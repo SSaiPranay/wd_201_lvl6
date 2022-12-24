@@ -10,7 +10,7 @@ function extractCsrfToken(response) {
   return $("[name=_csrf]").val();
 }
 
-describe("Let Us test the Todo", () => {
+describe("Let's test the Todo", () => {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
     server = app.listen(4000, () => {});
