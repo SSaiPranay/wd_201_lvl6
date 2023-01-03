@@ -98,14 +98,17 @@ describe("Todo test suite ", () => {
       .set("Accept", "application/json");
 
     const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-    const dueTodayCount = parsedGroupedResponse.dueToday.length;
-    const newTodo = parsedGroupedResponse.dueToday[dueTodayCount - 1];
-
+    const completedItemsCount = parsedGroupedResponse.dueToday.length;
+    const newTodo = parsedGroupedResponse.dueToday[completedItemsCount - 1];
+    //const completed = !newTodo.completed;
     res = await agent.get("/");
     csrfToken = extractCsrfToken(res);
 
-    const markCompleteResponse = await agent.put(`/todos/${newTodo.id}`).send({
-      _csrf: csrfToken,
+    const markCompleteResponse = await agent
+      .put(`/todos/${newTodo.id}`)
+      .send({
+        _csrf: csrfToken,
+        completed: false,
     });
     const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
     expect(parsedUpdateResponse.completed).toBe(false);
