@@ -169,4 +169,48 @@ describe("Todo test suite", () => {
     });
     expect(deletedResponse.statusCode).toBe(200);
   });
+  test("One user cannot delete todo of other user", async () => {
+    //create UserA account
+    let res = await agent.get("/signup");
+    let csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "Test",
+      lastName: "User C",
+      email: "userC@test.com",
+      password: "12345678",
+      _csrf: csrfToken,
+    });
+    //create Todo from UserA account
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/todos").send({
+      title: "Buy milk",
+      dueDate: new Date().toISOString(),
+      completed: false,
+      _csrf: csrfToken,
+    });
+    const idOfTodoFromUserA = res.id;
+    //Signout UserA
+    await agent.get("/signout");
+    //Create UserB account
+    res = await agent.get("/signup");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "Test",
+      lastName: "User D",
+      email: "userD@test.com",
+      password: "12345678",
+      _csrf: csrfToken,
+    });
+
+    //Try delete on UserA Todo from UserB account
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    const deleteResponse2 = await agent
+      .delete(`/todos/${idOfTodoFromUserA}`)
+      .send({
+        _csrf: csrfToken,
+      });
+    expect(deleteResponse2.statusCode).toBe(422);
+  });
 });
